@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#0b1220"><meta name="description" content="FMM 26 Ultimate Manager — gerencie seu clube e dispute o Brasileirão."><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="FMM 26"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/icon-192.png"><title>FMM 26 – Ultimate Manager</title>
+<style>
+:root{--bg:#0b1220;--panel:#151f30;--panel2:#1d2b40;--green:#35d07f;--txt:#f1f5f9;--muted:#9aa9bc;--red:#ff6577}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:15px system-ui,-apple-system,Segoe UI,sans-serif;padding:14px 12px 96px}
+header{max-width:760px;margin:0 auto 12px;color:var(--green);font-weight:900;font-size:20px;display:flex;justify-content:space-between;align-items:center}
+main{max-width:760px;margin:auto}.card{background:var(--panel);border:1px solid #26364d;border-radius:15px;padding:14px;margin:10px 0}
+h1{font-size:34px;line-height:1.05;color:var(--green);margin:20px 0 8px}h2{font-size:21px;margin:0 0 10px}h3{font-size:15px;color:var(--green);margin:0 0 8px}
+p,.muted{color:var(--muted)}button,select,input{font:inherit;border:0;border-radius:11px;padding:13px;background:var(--panel2);color:var(--txt);width:100%;margin:5px 0;min-height:48px}
+button.primary{background:var(--green);color:#062113;font-weight:900}button:disabled{opacity:.35}
+nav{position:fixed;bottom:0;left:0;right:0;background:#101a29;border-top:1px solid #29384c;padding:7px;display:flex;gap:5px;justify-content:center;z-index:3}
+nav button{font-size:12px;padding:8px 3px;min-height:48px;margin:0;flex:1;max-width:145px}
+.row{display:flex;gap:8px;align-items:center}.row>*{flex:1}.stat{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.stat div{background:#0f1928;padding:10px;border-radius:10px;text-align:center}.big{font-size:32px;font-weight:900;text-align:center}.green{color:var(--green)}.small{font-size:12px;color:var(--muted)}
+.player{display:flex;justify-content:space-between;gap:8px;align-items:center;text-align:left}.player button{text-align:left}
+table{width:100%;border-collapse:collapse;font-size:12px}td,th{padding:8px 4px;border-bottom:1px solid #29384c;text-align:center}td:nth-child(2),th:nth-child(2){text-align:left}.mine{color:var(--green);font-weight:800}
+.musicbox{max-width:760px;margin:0 auto 10px;background:#132238;border:1px solid #2d4562;border-radius:13px;padding:10px 12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}.musicbox .music-title{flex:1;min-width:135px;font-size:12px;color:#d9e7f5}.musicbox button{width:auto;min-width:46px;min-height:40px;padding:8px 12px;margin:0}.musicbox input{width:90px;min-height:32px;padding:0;margin:0;accent-color:var(--green)}
+#toast{position:fixed;top:12px;left:10%;width:80%;background:#24364d;padding:12px;border-radius:12px;text-align:center;display:none;z-index:5}
+
+.pitch-wrap{background:#101b28;border-radius:14px;padding:8px;overflow:hidden}
+.pitch{width:100%;display:block;border-radius:9px;background:#247a43}
+.pitch .player-dot{transition:cx .45s ease,cy .45s ease}
+.pitch .ball{transition:cx .28s ease,cy .28s ease}
+.match-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.scoreline{font-size:30px;font-weight:950;letter-spacing:2px;text-align:center}
+.clock{background:#091522;border:1px solid #39516b;border-radius:10px;padding:7px 12px;color:#f8fafc;font-weight:900}
+.match-team{font-size:12px;font-weight:800;max-width:38%;overflow:hidden;text-overflow:ellipsis}
+.live-tag{color:#35d07f;font-size:11px;font-weight:900;letter-spacing:1px}
+.match-actions{display:flex;gap:7px}.match-actions button{flex:1;font-size:13px}
+.event-feed{max-height:130px;overflow:auto;background:#0e1927;border-radius:10px;padding:9px;font-size:12px;color:#dce7f2}
+.event-feed p{margin:5px 0;border-bottom:1px solid #25364a;padding-bottom:5px}
+
+.vocal-playlist{max-width:760px;margin:0 auto 12px;background:#101d2e;border:1px solid #2d4562;border-radius:13px;padding:10px 12px}.vocal-head{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:6px;font-size:12px;color:#e8f2ff}.vocal-head span,.vocal-track small,.vocal-note{font-size:10px;color:#9fb1c7}.vocal-track{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 2px;border-top:1px solid #263b53}.vocal-track div{display:flex;flex-direction:column;gap:2px}.vocal-track b{font-size:12px}.vocal-track button{color:#071a12;background:#42d88a;border-radius:8px;padding:7px 12px;text-decoration:none;font-size:11px;font-weight:800;white-space:nowrap;width:auto;min-width:62px;min-height:34px;margin:0}.vocal-note{margin:6px 0 0;line-height:1.4}
+</style></head>
+<body><div id="toast"></div><header><span>⚽ FMM 26 – ULTIMATE MANAGER</span><span id="seasonTag"></span></header><div class="musicbox"><span>🎧</span><span class="music-title"><b>Playlist do estádio</b><br><span id="musicStatus">Músicas completas · desligado</span></span><button id="musicToggle" onclick="toggleMusic()">▶</button><button onclick="nextMood()">⏭</button><label class="small">VOL <input id="musicVol" type="range" min="0" max="100" value="55" oninput="setMusicVolume(this.value)"></label></div>
+<section class="vocal-playlist" aria-label="Playlist de músicas completas">
+ <div class="vocal-head"><b>🎵 PLAYLIST FIFA STYLE</b><span>Faixas completas · toque para ouvir</span></div>
+ <div class="vocal-track"><div><b>Tropical Island House</b><small>Sascha Ende · house dançante · 2:08</small></div><button onclick="playTrack(0)">▶ Tocar</button></div>
+ <div class="vocal-track"><div><b>Clap Along With Me</b><small>Sascha Ende · pop animado · 2:56</small></div><button onclick="playTrack(1)">▶ Tocar</button></div>
+ <div class="vocal-track"><div><b>Everybody Up</b><small>Sascha Ende · eletrônico com vocal · 0:44</small></div><button onclick="playTrack(2)">▶ Tocar</button></div>
+ <div class="vocal-track"><div><b>Tranceverse</b><small>Sascha Ende · trance eletrônico · 4:56</small></div><button onclick="playTrack(3)">▶ Tocar</button></div>
+ <p class="vocal-note">As músicas são faixas completas hospedadas no Wikimedia Commons e precisam de internet. Créditos: Sascha Ende. Licença CC BY 4.0. <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">Ver licença</a>.</p>
+ <audio id="gameMusic" preload="none"></audio>
+</section><main id="app"></main>
+<nav id="nav" hidden><button onclick="screen('home')">Início</button><button onclick="screen('squad')">Elenco</button><button onclick="screen('tactics')">Táticas</button><button onclick="screen('table')">Tabela</button><button onclick="screen('more')">Mais</button></nav>
+<script>
+
+// Playlist de faixas musicais completas (streaming online, não sintetizadas).
+const musicTracks=[
+ {name:"Tropical Island House",artist:"Sascha Ende",src:"https://upload.wikimedia.org/wikipedia/commons/e/ee/Tropical_Island_House_by_Sascha_Ende.mp3"},
+ {name:"Clap Along With Me",artist:"Sascha Ende",src:"https://upload.wikimedia.org/wikipedia/commons/8/8f/Clap_Along_With_Me_par_Sascha_Ende.mp3"},
+ {name:"Everybody Up",artist:"Sascha Ende",src:"https://upload.wikimedia.org/wikipedia/commons/4/4b/Everybody_Up_by_Sascha_Ende.mp3"},
+ {name:"Tranceverse",artist:"Sascha Ende",src:"https://upload.wikimedia.org/wikipedia/commons/0/03/Tranceverse_by_Sascha_Ende.ogg"}
+];
+let moodIndex=0,musicOn=false;
+const gameMusic=document.getElementById('gameMusic');
+function updateMusicStatus(extra){document.getElementById('musicStatus').textContent=musicTracks[moodIndex].name+' · '+extra;}
+function playTrack(i){moodIndex=(i+musicTracks.length)%musicTracks.length;const t=musicTracks[moodIndex];gameMusic.src=t.src;gameMusic.volume=Number(document.getElementById('musicVol').value)/100;gameMusic.play().then(()=>{musicOn=true;document.getElementById('musicToggle').textContent='Ⅱ';updateMusicStatus('tocando')}).catch(()=>{musicOn=false;document.getElementById('musicToggle').textContent='▶';updateMusicStatus('toque em Tocar novamente')});}
+function toggleMusic(){if(!gameMusic.src){playTrack(moodIndex);return;}if(gameMusic.paused){gameMusic.play().then(()=>{musicOn=true;document.getElementById('musicToggle').textContent='Ⅱ';updateMusicStatus('tocando')}).catch(()=>updateMusicStatus('não foi possível carregar'))}else{gameMusic.pause();musicOn=false;document.getElementById('musicToggle').textContent='▶';updateMusicStatus('pausado')}}
+function nextMood(){playTrack((moodIndex+1)%musicTracks.length)}
+function setMusicVolume(v){gameMusic.volume=Number(v)/100}
+gameMusic.addEventListener('ended',()=>nextMood());
+gameMusic.addEventListener('error',()=>{musicOn=false;document.getElementById('musicToggle').textContent='▶';updateMusicStatus('erro ao carregar · confira a internet')});
+
+const names=["Athletico Paranaense","Atlético Mineiro","Bahia","Botafogo","Chapecoense","Corinthians","Coritiba","Cruzeiro","Flamengo","Fluminense","Grêmio","Internacional","Mirassol","Palmeiras","Red Bull Bragantino","Remo","Santos","São Paulo","Vasco da Gama","Vitória"];
+const bNames=["América-MG","Athletic Club","Atlético-GO","Avaí","Botafogo-SP","Ceará","CRB","Criciúma","Cuiabá","Fortaleza","Goiás","Juventude","Londrina","Náutico","Novorizontino","Operário-PR","Ponte Preta","São Bernardo","Sport","Vila Nova"];
+const reps=[76,77,74,75,67,75,68,79,88,81,77,76,70,90,75,66,78,80,77,69], pos=["GOL","GOL","ZAG","ZAG","ZAG","LD","LE","VOL","VOL","MC","MC","MEI","PE","PD","CA","CA","CA","MEI","MC","ZAG","LD","LE","VOL","PE","PD"];
+const realRosters={
+"Athletico Paranaense":[["Santos","GOL"],["Benavídez","LD"],["Carlos Terán","ZAG"],["Arthur Dias","ZAG"],["Lucas Esquivel","LE"],["Jadson","VOL"],["Juan Portilla","VOL"],["Bruno Zapelli","MEI"],["Julimar","PE"],["Kevin Viveros","CA"],["Stiven Mendoza","PD"]],
+"Atlético Mineiro":[["Everson","GOL"],["Angelo Preciado","LD"],["Ruan","ZAG"],["Vitor Hugo","ZAG"],["Renan Lodi","LE"],["Alan Franco","VOL"],["Maycon","VOL"],["Bernard","MEI"],["Dudu","PE"],["Hulk","CA"],["Alan Minda","PD"]],
+"Bahia":[["Ronaldo","GOL"],["Román Gómez","LD"],["Gabriel Xavier","ZAG"],["Kanu","ZAG"],["Luciano Juba","LE"],["Nicolás Acevedo","VOL"],["Erick","VOL"],["Michel Araújo","MEI"],["Ademir","PE"],["Willian José","CA"],["Iago","PD"]],
+"Botafogo":[["Neto","GOL"],["Vitinho","LD"],["Alexander Barboza","ZAG"],["Bastos","ZAG"],["Alex Telles","LE"],["Allan","VOL"],["Danilo","VOL"],["Álvaro Montoro","MEI"],["Artur","PE"],["Arthur Cabral","CA"],["Lucas Villalba","PD"]],
+"Chapecoense":[["Rafael Santos","GOL"],["Victor Caetano","LD"],["Eduardo Doma","ZAG"],["João Paulo","ZAG"],["Walter Clar","LE"],["Camilo","VOL"],["Rafael Carvalheira","VOL"],["Giovanni Augusto","MEI"],["Marcinho","PE"],["Ítalo","CA"],["Ênio","PD"]],
+"Corinthians":[["Hugo Souza","GOL"],["Matheuzinho","LD"],["André Ramalho","ZAG"],["Gustavo Henrique","ZAG"],["Matheus Bidu","LE"],["Raniele","VOL"],["Carrillo","VOL"],["Rodrigo Garro","MEI"],["Breno Bidon","MC"],["Memphis Depay","PE"],["Yuri Alberto","CA"]],
+"Coritiba":[["Pedro Morisco","GOL"],["Tinga","LD"],["Maicon","ZAG"],["Jacy","ZAG"],["Bruno Melo","LE"],["Willian Oliveira","VOL"],["Sebastián Gómez","VOL"],["Josué","MEI"],["Lucas Ronier","PE"],["Pedro Rocha","CA"],["Breno Lopes","PD"]],
+"Cruzeiro":[["Cássio","GOL"],["William","LD"],["Fabrício Bruno","ZAG"],["Jonathan Jesus","ZAG"],["Kaiki","LE"],["Lucas Romero","VOL"],["Gerson","VOL"],["Matheus Pereira","MEI"],["Arroyo","PE"],["Kaio Jorge","CA"],["Gabriel Pec","PD"]],
+"Flamengo":[["Agustín Rossi","GOL"],["Guillermo Varela","LD"],["Léo Ortiz","ZAG"],["Léo Pereira","ZAG"],["Alex Sandro","LE"],["Erick Pulgar","VOL"],["Jorginho","VOL"],["De Arrascaeta","MEI"],["Samuel Lino","PE"],["Pedro","CA"],["Bruno Henrique","PD"]],
+"Fluminense":[["Fábio","GOL"],["Samuel Xavier","LD"],["Ignácio","ZAG"],["Freytes","ZAG"],["Guilherme Arana","LE"],["Martinelli","VOL"],["Hércules","VOL"],["Savarino","MEI"],["Canobbio","PE"],["Everaldo","CA"],["Serna","PD"]],
+"Grêmio":[["Weverton","GOL"],["Marcos Rocha","LD"],["Gustavo Martins","ZAG"],["Wagner Leonardo","ZAG"],["Caio Paulista","LE"],["Arthur","VOL"],["Edenilson","VOL"],["Cristaldo","MEI"],["Tetê","PE"],["Carlos Vinícius","CA"],["Enamorado","PD"]],
+"Internacional":[["Rochet","GOL"],["Bruno Gomes","LD"],["Gabriel Mercado","ZAG"],["Félix Torres","ZAG"],["Bernabei","LE"],["Thiago Maia","VOL"],["Rodrigo Villagra","VOL"],["Alan Patrick","MEI"],["Carbonero","PE"],["Borré","CA"],["Vitinho","PD"]],
+"Mirassol":[["Walter","GOL"],["Daniel Borges","LD"],["João Victor","ZAG"],["Luiz Otávio","ZAG"],["Reinaldo","LE"],["Neto Moura","VOL"],["Yuri Lara","VOL"],["Shaylon","MEI"],["Lucas Mugni","PE"],["Alesson","PD"],["André Luís","CA"]],
+"Palmeiras":[["Carlos Miguel","GOL"],["Khellven","LD"],["Gustavo Gómez","ZAG"],["Murilo","ZAG"],["Piquerez","LE"],["Marlon Freitas","VOL"],["Andreas Pereira","VOL"],["Felipe Anderson","MEI"],["Allan","PE"],["Flaco López","CA"],["Vitor Roque","PD"]],
+"Red Bull Bragantino":[["Cleiton","GOL"],["Agustín Sant’Anna","LD"],["Gustavo Marques","ZAG"],["Alix Vinícius","ZAG"],["Juninho Capixaba","LE"],["Gabriel","VOL"],["Eric Ramires","VOL"],["Jhon Jhon","MEI"],["Lucas Barbosa","PE"],["Eduardo Sasha","CA"],["Henry Mosquera","PD"]],
+"Remo":[["Marcelo Rangel","GOL"],["João Lucas","LD"],["Klaus","ZAG"],["Léo Andrade","ZAG"],["Sávio","LE"],["Zé Ricardo","VOL"],["Patrick de Paula","VOL"],["Patrick","MEI"],["Yago Pikachu","PE"],["João Pedro","CA"],["Nicolás Ferreira","PD"]],
+"Santos":[["Gabriel Brazão","GOL"],["Igor Vinícius","LD"],["Adonis Frías","ZAG"],["Zé Ivaldo","ZAG"],["Souza","LE"],["Willian Arão","VOL"],["João Schmidt","VOL"],["Neymar","MEI"],["Barreal","PE"],["Gabriel Barbosa","CA"],["Rollheiser","PD"]],
+"São Paulo":[["Rafael","GOL"],["Maik","LD"],["Ferraresi","ZAG"],["Arboleda","ZAG"],["Enzo Díaz","LE"],["Pablo Maia","VOL"],["Damián Bobadilla","VOL"],["Marcos Antônio","MEI"],["Lucas Moura","PE"],["Calleri","CA"],["Luciano","PD"]],
+"Vasco da Gama":[["Léo Jardim","GOL"],["Paulo Henrique","LD"],["Carlos Cuesta","ZAG"],["Robert Renan","ZAG"],["Lucas Piton","LE"],["Thiago Mendes","VOL"],["Barros","VOL"],["Philippe Coutinho","MEI"],["Andrés Gómez","PE"],["GB","CA"],["Nuno Moreira","PD"]],
+"Vitória":[["Gabriel Vasconcellos","GOL"],["Matheuzinho","LD"],["Camutanga","ZAG"],["Riccieli","ZAG"],["Ramon","LE"],["Gabriel Baralhas","VOL"],["Ronald","VOL"],["Erick","MEI"],["Aitor Cantalapiedra","PE"],["Renato Kayzer","CA"],["Matheusinho","PD"]]
+};
+const formations={"4-3-3":["GOL","LE","ZAG","ZAG","LD","VOL","MC","MC","PE","CA","PD"],"4-4-2":["GOL","LE","ZAG","ZAG","LD","MC","MC","PE","PD","CA","CA"],"3-5-2":["GOL","ZAG","ZAG","ZAG","LE","VOL","MC","MEI","LD","CA","CA"],"4-2-3-1":["GOL","LE","ZAG","ZAG","LD","VOL","VOL","PE","MEI","PD","CA"],"5-3-2":["GOL","LE","ZAG","ZAG","ZAG","LD","MC","VOL","MC","CA","CA"]};
+let G=null,tab="home",matchTimer=null,liveMatchState=null;
+const $=s=>document.querySelector(s), esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function player(base,p,realName=null,idx=0){let age=realName?(20+(idx*3+base)%13):18+(idx%8),ovr=realName?Math.max(58,Math.min(91,base-5+((idx*7)%11))):Math.max(48,Math.min(75,base-12+(idx%9)));return {name:realName||`Atleta da base ${String(idx+1).padStart(2,"0")}`,age,pos:p,ovr,pot:Math.min(95,ovr+(age<27?8:3)),moral:70,fit:100,inj:0,susp:0,goals:0,base:!realName};}
+function makeClub(name,rep){let roster=realRosters[name]||[];let players=roster.map((x,i)=>player(rep,x[1],x[0],i));while(players.length<25){let p=pos[players.length%pos.length];players.push(player(rep-7,p,null,players.length));}return {name,rep,formation:"4-3-3",style:"Equilibrado",players,xi:[]};}
+function fixtures(teamCount=20){let t=Array.from({length:teamCount},(_,i)=>i),firstHalf=[];for(let r=0;r<teamCount-1;r++){let pairs=[];for(let i=0;i<teamCount/2;i++){let a=t[i],b=t[teamCount-1-i];pairs.push((r+i)%2?[b,a]:[a,b]);}firstHalf.push(pairs);t.splice(1,0,t.pop());}return firstHalf.concat(firstHalf.map(r=>r.map(([a,b])=>[b,a])));}
+function newGame(){let clubs=names.map((name,i)=>makeClub(name,reps[i]));let bClubs=bNames.map((name,i)=>makeClub(name,65+(i%8)));G={coach:$("#coach").value||"Treinador",club:0,season:1,day:0,round:0,clubs,fixtures:fixtures(20),table:names.map(()=>({pts:0,j:0,v:0,e:0,d:0,gp:0,gc:0})),news:["Bem-vindo ao comando do clube! Elencos baseados nos times-base do Brasileirão 2026."],last:"Nenhum jogo disputado.",scorers:{},division:"A",bClubs,bTable:bNames.map(()=>({pts:0,j:0,v:0,e:0,d:0,gp:0,gc:0})),bNews:[],started:false};clubs.forEach((c,i)=>autoXI(i));showClubs();}
+function createLeagueClub(name,rep){return makeClub(name,rep);}
+function autoXI(ci){let c=G.clubs[ci],used=[];c.xi=formations[c.formation].map(slot=>{let cand=c.players.map((p,i)=>({i,s:p.ovr-(p.pos===slot?0:((group(p.pos)===group(slot))?6:25))})).filter(x=>!used.includes(x.i)&&!c.players[x.i].inj&&!c.players[x.i].susp).sort((a,b)=>b.s-a)[0];let n=cand?cand.i:0;used.push(n);return n;});}
+function group(p){return ["GOL"].includes(p)?0:["ZAG","LD","LE"].includes(p)?1:["VOL","MC","MEI"].includes(p)?2:3}
+function showClubs(){let sorted=names.map((n,i)=>i).sort((a,b)=>reps[b]-reps[a]);$("#nav").hidden=true;$("#app").innerHTML=`<section class="card"><h1>Escolha seu clube</h1><p>Escolha um dos 20 clubes reais da Série A do Brasileirão 2026.</p></section>`+sorted.map(i=>`<section class="card"><h2>${names[i]}</h2><p>Reputação ${reps[i]} · elenco ${Math.round(G.clubs[i].players.reduce((a,p)=>a+p.ovr,0)/25)}</p><button class="primary" onclick="chooseClub(${i})">ASSUMIR O CLUBE</button></section>`).join("");}
+function chooseClub(i){G.club=i;G.clubs[i].style="Equilibrado";G.obj=Math.max(3,Math.min(14,names.map((_,x)=>x).sort((a,b)=>reps[b]-reps[a]).indexOf(i)+2));G.started=true;save();screen("home");}
+function save(){localStorage.setItem("fmm_mobile_save_2026_v3",JSON.stringify(G));}
+function load(){try{G=JSON.parse(localStorage.getItem("fmm_mobile_save_2026_v3"));return G&&G.started}catch(e){return false}}
+function screen(t){if(matchTimer){clearInterval(matchTimer);matchTimer=null}tab=t;$("#nav").hidden=!G?.started;$("#seasonTag").textContent=G?.started?`S${G.season} · Série ${G.division||"A"} · R${Math.min(G.round+1,38)}/38`:"";if(!G?.started){menu();return}let c=G.clubs[G.club];let out="";
+if(t==="home"){let nm=nextMatch(),st=standings(),tb=G.table[G.club];out=`<section class="card"><h2>Olá, ${esc(G.coach)} 👋</h2><p>${esc(c.name)} · Série ${G.division||"A"} · Temporada ${G.season} · ${["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"][G.day%7]}</p><h3>PRÓXIMO JOGO</h3><div class="big">${nm?`${nm.home===G.club?"⚽":"✈️"} ${esc(G.clubs[nm.home===G.club?nm.away:nm.home].name)}`:"Temporada encerrada"}</div><p>${nm?`Em ${nm.days} dia(s) · ${nm.home===G.club?"Em casa":"Fora"}`:"Avance o dia para ver o resumo."}</p><button class="primary" onclick="advance()">AVANÇAR DIA</button></section><section class="card"><div class="stat"><div><b>${st.indexOf(G.club)+1}º</b><br><span class="small">Posição</span></div><div><b>${tb.pts}</b><br><span class="small">Pontos</span></div><div><b>${avgXI(G.club)}</b><br><span class="small">Força XI</span></div></div><p>Objetivo: terminar no top ${G.obj} · Confiança: ${G.board||60}%</p><p>Último jogo: ${esc(G.last)}</p></section><section class="card"><h3>NOTÍCIAS</h3>${G.news.slice(-5).reverse().map(x=>`<p>• ${esc(x)}</p>`).join("")}</section>`;}
+if(t==="squad"){out=`<section class="card"><h2>Elenco · ${c.players.length} jogadores</h2><p>11 nomes reais por clube, baseados em escalações-base de 2026. Os 14 reservas extras são fictícios e aparecem identificados como atletas da base.</p></section>`+c.players.map((p,i)=>`<section class="card player"><button onclick="playerInfo(${i})">${c.xi.includes(i)?"⭐ ":""}${p.pos} · ${esc(p.name)}<br><span class="small">${p.base?"Jogador fictício da base · ":"Elenco 2026 · "}${p.age} anos · ${p.ovr} OVR · Pot ${p.pot} · moral ${p.moral} · físico ${p.fit}% ${p.inj?`· LESÃO ${p.inj}d`:""} ${p.susp?"· SUSPENSO":""}</span></button></section>`).join("");}
+if(t==="tactics"){out=`<section class="card"><h2>Táticas</h2><label>Formação</label><select id="formation" onchange="setFormation(this.value)">${Object.keys(formations).map(f=>`<option ${c.formation===f?"selected":""}>${f}</option>`).join("")}</select><label>Estilo</label><select id="style" onchange="cStyle(this.value)">${["Defensivo","Equilibrado","Ofensivo"].map(s=>`<option ${c.style===s?"selected":""}>${s}</option>`).join("")}</select><button onclick="autoXI(${G.club});save();screen('tactics')">AUTO-ESCALAR</button><h3>TITULARES · toque para trocar</h3>${formations[c.formation].map((s,i)=>`<button onclick="pickSlot(${i})">${s} · ${esc(c.players[c.xi[i]].name)} (${c.players[c.xi[i]].ovr})</button>`).join("")}</section>`;}
+if(t==="table"){let order=standings();out=`<section class="card"><h2>Classificação</h2><div style="overflow-x:auto"><table><tr><th>#</th><th>Time</th><th>Pts</th><th>J</th><th>V</th><th>E</th><th>D</th><th>SG</th></tr>${order.map((i,n)=>{let x=G.table[i];return `<tr class="${i===G.club?"mine":""}"><td>${n+1}</td><td>${esc(G.clubs[i].name)}</td><td>${x.pts}</td><td>${x.j}</td><td>${x.v}</td><td>${x.e}</td><td>${x.d}</td><td>${x.gp-x.gc}</td></tr>`}).join("")}</table></div></section>${G.division==="A"?`<section class="card"><h3>SÉRIE B · DISPUTA PELO ACESSO</h3><div style="overflow-x:auto"><table><tr><th>#</th><th>Time</th><th>Pts</th><th>J</th><th>SG</th></tr>${bNames.map((n,i)=>i).sort((a,b)=>G.bTable[b].pts-G.bTable[a].pts||G.bTable[b].v-G.bTable[a].v||(G.bTable[b].gp-G.bTable[b].gc)-(G.bTable[a].gp-G.bTable[a].gc)).map((i,n)=>`<tr><td>${n+1}</td><td>${esc(bNames[i])}</td><td>${G.bTable[i].pts}</td><td>${G.bTable[i].j}</td><td>${G.bTable[i].gp-G.bTable[i].gc}</td></tr>`).join("")}</table></div><p class="small">Os dois primeiros sobem direto. Do 3º ao 6º, os clubes disputam dois playoffs por mais duas vagas.</p></section>`:""}<section class="card"><h3>ARTILHARIA</h3>${Object.entries(G.scorers).sort((a,b)=>b[1]-a[1]).slice(0,12).map(([n,v])=>`<p>${v} gols · ${esc(n)}</p>`).join("")||"<p>Ainda sem gols.</p>"}</section><section class="card"><h3>ÚLTIMOS RESULTADOS</h3>${G.history?.slice(-8).reverse().map(x=>`<p>${G.clubs[x.h].name} ${x.hg} x ${x.ag} ${G.clubs[x.a].name}</p>`).join("")||"<p>Nenhuma partida ainda.</p>"}</section>`;}
+if(t==="more"){let hurt=c.players.map((p,i)=>({p,i})).filter(x=>x.p.inj>0);out=`<section class="card"><h2>Departamento médico</h2><p>${hurt.length?hurt.map(x=>`${esc(x.p.name)} · ${x.p.inj} dia(s) de recuperação`).join("<br>") : "Nenhum jogador lesionado no momento."}</p><p class="small">Lesões podem acontecer em partidas e treinamentos. Jogadores lesionados não entram na escalação.</p></section><section class="card"><h2>Mais opções</h2>${G.lastSeason?`<p>Última temporada: campeão ${esc(G.lastSeason.champion)}.</p><p>Rebaixados: ${G.lastSeason.relegated.map(esc).join(", ")}</p><p>Promovidos: ${G.lastSeason.promoted.map(esc).join(", ")}</p>`:""}<button class="primary" onclick="save();toast('Jogo salvo!')">SALVAR JOGO</button><button onclick="if(confirm('Voltar ao menu? Seu progresso ficará salvo.')){save();G=null;menu()}">MENU PRINCIPAL</button><p class="muted">Versão mobile · elencos-base 2026 · reservas fictícias da base identificadas · progresso salvo neste aparelho.</p></section>`;}
+$("#app").innerHTML=out;}
+function menu(){ $("#nav").hidden=true;$("#seasonTag").textContent="";let has=!!localStorage.getItem("fmm_mobile_save_2026_v3");$("#app").innerHTML=`<section class="card"><h1>FOOTBALL<br>MASTER MANAGER</h1><p>Monte seu time, escolha as táticas e leve seu clube ao título.</p><label>Nome do treinador</label><input id="coach" placeholder="Seu nome" maxlength="24"><button class="primary" onclick="newGame()">NOVO JOGO</button><button onclick="if(load())screen('home');else toast('Nenhum save encontrado')">CONTINUAR</button><p class="small">Jogo de gerenciamento · offline · feito para celular</p></section>`;}
+function nextMatch(){if(G.round>=38)return null;let p=G.fixtures[G.round].find(x=>x.includes(G.club));return p?{home:p[0],away:p[1],days:Math.max(0,7*G.round+5-G.day)}:null}
+function standings(){return G.clubs.map((_,i)=>i).sort((a,b)=>{let x=G.table[a],y=G.table[b];return y.pts-x.pts||y.v-x.v||(y.gp-y.gc)-(x.gp-x.gc)||y.gp-x.gp})}
+function playoffWinner(higherRanked,lowerRanked){return Math.random()<.68?higherRanked:lowerRanked;}
+function simulateBRound(){let fx=fixtures(20)[G.round];fx.forEach(([h,a])=>{let gh=Math.random()*4|0,ga=Math.random()*4|0;[[h,gh,ga],[a,ga,gh]].forEach(([id,gf,gc])=>{let t=G.bTable[id];t.j++;t.gp+=gf;t.gc+=gc;if(gf>gc){t.v++;t.pts+=3}else if(gf===gc){t.e++;t.pts++}else t.d++;});});}
+function avgXI(ci){return Math.round(G.clubs[ci].xi.reduce((a,i)=>a+G.clubs[ci].players[i].ovr,0)/11)}
+function match(h,a){let ch=G.clubs[h],ca=G.clubs[a],power=i=>{let cc=G.clubs[i],ov=avgXI(i),style=cc.style==="Ofensivo"?1.12:cc.style==="Defensivo"?.9:1;return ov/70*style*(.85+Math.random()*.3)};let ph=power(h)*1.07,pa=power(a),goals=x=>{let n=0;for(let z=0;z<12;z++)if(Math.random()<Math.min(.42,.09*x))n++;return n};let gh=goals(ph),ga=goals(pa);let stats={poss:Math.round(48+Math.random()*10),shots:[4+Math.random()*12|0,4+Math.random()*12|0],sot:[1+Math.random()*6|0,1+Math.random()*6|0],fouls:[7+Math.random()*9|0,7+Math.random()*9|0]};return {gh,ga,stats};}
+function updateResult(h,a,r){[[h,r.gh,r.ga],[a,r.ga,r.gh]].forEach(([id,gf,gc])=>{let t=G.table[id];t.j++;t.gp+=gf;t.gc+=gc;if(gf>gc){t.v++;t.pts+=3}else if(gf===gc){t.e++;t.pts++}else t.d++;let c=G.clubs[id];c.xi.forEach(i=>{let p=c.players[i];p.fit=Math.max(25,p.fit-(10+Math.random()*13|0));p.moral=Math.max(10,Math.min(100,p.moral+(gf>gc?6:gf<gc?-6:0)));if(!p.inj&&Math.random()<.035){p.inj=2+(Math.random()*13|0);p.injuryType=["distensão muscular","torção","contusão","desconforto muscular"][Math.random()*4|0];G.news.push(`${p.name} sofreu ${p.injuryType} e ficará fora por ${p.inj} dias.`);if(G.news.length>40)G.news.shift();}})});let scorer=G.clubs[gfTeam(h,a,r)].players;for(let k=0;k<r.gh+r.ga;k++){let team=k<r.gh?h:a,cc=G.clubs[team],p=cc.players[cc.xi[8+Math.random()*3|0]];p.goals++;let key=`${p.name} (${cc.name.slice(0,3).toUpperCase()})`;G.scorers[key]=(G.scorers[key]||0)+1;}}
+function gfTeam(h,a,r){return h}
+function advance(){if(G.round>=38){finishSeason();return}if(G.day%7===5){let r=G.round,userResult=null;simulateBRound();for(let [h,a] of G.fixtures[r]){autoXI(h);autoXI(a);let res=match(h,a);updateResult(h,a,res);G.history=G.history||[];G.history.push({h,a,hg:res.gh,ag:res.ga});if(h===G.club||a===G.club){userResult={h,a,res};G.last=`Rodada ${r+1}: ${G.clubs[h].name} ${res.gh} x ${res.ga} ${G.clubs[a].name}`}}G.round++;G.day++;daily();save();if(userResult){showMatch(userResult.h,userResult.a,userResult.res);return}}G.day++;daily();save();screen(tab);}
+function daily(){G.clubs.forEach((c,ci)=>c.players.forEach(p=>{if(p.inj>0){p.inj--;if(p.inj===0){G.news.push(`${p.name} está recuperado e liberado para jogar.`);if(G.news.length>40)G.news.shift();}}else if(Math.random()<.0008){p.inj=2+(Math.random()*8|0);p.injuryType="lesão no treinamento";G.news.push(`${p.name} se lesionou no treinamento e ficará fora por ${p.inj} dias.`);if(G.news.length>40)G.news.shift();}p.fit=Math.min(100,p.fit+6);p.moral+=p.moral>65?-1:p.moral<65?1:0;if(G.day%7===0&&p.ovr<p.pot&&Math.random()<.05)p.ovr++;}));}
+function showMatch(h,a,r){
+  if(matchTimer){clearInterval(matchTimer);matchTimer=null}
+  $("#nav").hidden=true;
+  const home=G.clubs[h],away=G.clubs[a];
+  const homeShape=[[50,88],[25,76],[42,78],[58,78],[75,76],[36,59],[50,63],[64,59],[25,35],[50,27],[75,35]];
+  const awayShape=homeShape.map(([x,y])=>[100-x,100-y]);
+  const makePlayers=(team,coords,side)=>coords.map(([x,y],i)=>{
+    const p=team.players[team.xi[i]];
+    const color=side==="home"?"#e8f4ff":"#ffdf63";
+    return `<g class="player-dot" id="p_${side}_${i}"><circle cx="${x}" cy="${y}" r="3.5" fill="${color}" stroke="#12202d" stroke-width="1.1"/><text x="${x}" y="${y+1.15}" text-anchor="middle" font-size="2.5" font-weight="900" fill="#172536">${i+1}</text></g>`;
+  }).join("");
+  const goalEvents=[];
+  for(let i=0;i<r.gh;i++)goalEvents.push({minute:Math.max(2,Math.floor((i+1)*88/(r.gh+1)+Math.random()*5)),side:"home"});
+  for(let i=0;i<r.ga;i++)goalEvents.push({minute:Math.max(2,Math.floor((i+1)*88/(r.ga+1)+Math.random()*5)),side:"away"});
+  goalEvents.sort((a,b)=>a.minute-b.minute);
+  liveMatchState={minute:0,gh:0,ga:0,paused:false,events:goalEvents,done:false};
+  $("#app").innerHTML=`<section class="card">
+    <div class="match-top"><span class="match-team">${esc(home.name)}</span><span class="live-tag">● AO VIVO</span><span class="match-team" style="text-align:right">${esc(away.name)}</span></div>
+    <div class="match-top"><span class="scoreline" id="liveScore">0 - 0</span><span class="clock" id="liveClock">00:00</span></div>
+    <div class="pitch-wrap"><svg class="pitch" id="livePitch" viewBox="0 0 100 100" role="img" aria-label="Campo de futebol 2D visto de cima">
+      <defs><pattern id="grass" width="20" height="100" patternUnits="userSpaceOnUse"><rect width="10" height="100" fill="#2b884c"/><rect x="10" width="10" height="100" fill="#247a43"/></pattern></defs>
+      <rect width="100" height="100" fill="url(#grass)"/>
+      <g fill="none" stroke="#e5f3e8" stroke-width=".55" opacity=".9">
+        <rect x="3" y="3" width="94" height="94"/><line x1="3" y1="50" x2="97" y2="50"/>
+        <circle cx="50" cy="50" r="9"/><circle cx="50" cy="50" r=".7" fill="#e5f3e8"/>
+        <rect x="25" y="3" width="50" height="16"/><rect x="37" y="3" width="26" height="6"/>
+        <rect x="25" y="81" width="50" height="16"/><rect x="37" y="91" width="26" height="6"/>
+        <path d="M40 19 Q50 28 60 19 M40 81 Q50 72 60 81"/>
+        <path d="M47 3 Q50 7 53 3 M47 97 Q50 93 53 97"/>
+      </g>
+      <g id="playersHome">${makePlayers(home,homeShape,"home")}</g>
+      <g id="playersAway">${makePlayers(away,awayShape,"away")}</g>
+      <circle id="liveBall" class="ball" cx="50" cy="50" r="1.6" fill="#fff" stroke="#111" stroke-width=".55"/>
+    </svg></div>
+    <div class="small" style="text-align:center;margin-top:7px">VISÃO TÁTICA 2D · jogadores se movimentam durante a partida</div>
+  </section>
+  <section class="card"><h3>RELATO DA PARTIDA</h3><div class="event-feed" id="liveFeed"><p>00' · Apita o árbitro! A bola está rolando.</p></div>
+    <div class="match-actions"><button id="pauseLive" onclick="toggleLivePause()">PAUSAR</button><button onclick="skipLiveMatch()" class="primary">SIMULAR RESTANTE</button></div>
+  </section>
+  <section class="card"><div class="stat"><div><b>${r.stats.poss}%</b><br><span class="small">Posse casa</span></div><div><b>${r.stats.shots[0]} x ${r.stats.shots[1]}</b><br><span class="small">Chutes</span></div><div><b>${r.stats.sot[0]} x ${r.stats.sot[1]}</b><br><span class="small">No alvo</span></div></div></section>`;
+  const feed=$("#liveFeed");
+  function addFeed(msg){feed.insertAdjacentHTML("afterbegin",`<p>${msg}</p>`)}
+  function tick(){
+    if(!liveMatchState||liveMatchState.paused||liveMatchState.done)return;
+    let s=liveMatchState;s.minute++;
+    let side=Math.random()<.5?"home":"away";
+    let i=Math.random()*11|0, x=side==="home"?homeShape[i][0]:awayShape[i][0], y=side==="home"?homeShape[i][1]:awayShape[i][1];
+    x=Math.max(5,Math.min(95,x+(Math.random()-.5)*20));y=Math.max(5,Math.min(95,y+(Math.random()-.5)*20));
+    $("#liveBall").setAttribute("cx",x);$("#liveBall").setAttribute("cy",y);
+    let team=side==="home"?home:away,coords=side==="home"?homeShape:awayShape;
+    let target=coords[i];let node=$("#p_"+side+"_"+i);
+    if(node){node.querySelector("circle").setAttribute("cx",Math.max(4,Math.min(96,target[0]+(Math.random()-.5)*12)));node.querySelector("circle").setAttribute("cy",Math.max(4,Math.min(96,target[1]+(Math.random()-.5)*12)));}
+    let ev=s.events.find(e=>e.minute===s.minute);
+    if(ev){if(ev.side==="home")s.gh++;else s.ga++;$("#liveScore").textContent=`${s.gh} - ${s.ga}`;addFeed(`<b class="green">${s.minute}' · GOOOOOL!</b> ${esc(ev.side==="home"?home.name:away.name)} marca!`);}
+    else if(s.minute===45)addFeed("45' · Intervalo! Os times vão para o vestiário.");
+    else if(s.minute===46)addFeed("46' · Começa o segundo tempo!");
+    else if(s.minute===90)addFeed("90' · O árbitro confere o relógio. Fim de jogo!");
+    else if(Math.random()<.19){let msgs=["Boa troca de passes no meio-campo.","A defesa corta e afasta o perigo.","Tentativa de lançamento pela ponta.","O time aperta a marcação.","A bola passa perto da área!","O goleiro fica com a bola."];addFeed(`${s.minute}' · ${msgs[Math.random()*msgs.length|0]}`);}
+    $("#liveClock").textContent=`${String(Math.floor(s.minute)).padStart(2,"0")}:00`;
+    if(s.minute>=90){s.done=true;clearInterval(matchTimer);matchTimer=null;$("#pauseLive").textContent="PARTIDA ENCERRADA";addFeed("<b>APITO FINAL · Partida encerrada!</b>");$("#app").insertAdjacentHTML("beforeend",`<section class="card"><h2>Fim de jogo</h2><div class="big green">${s.gh} x ${s.ga}</div><button class="primary" onclick="screen('home')">CONTINUAR</button></section>`);}
+  }
+  matchTimer=setInterval(tick,420);
+}
+function toggleLivePause(){if(!liveMatchState||liveMatchState.done)return;liveMatchState.paused=!liveMatchState.paused;$("#pauseLive").textContent=liveMatchState.paused?"RETOMAR":"PAUSAR";}
+function skipLiveMatch(){if(!liveMatchState||liveMatchState.done)return;if(matchTimer){clearInterval(matchTimer);matchTimer=null}liveMatchState.minute=90;liveMatchState.gh=liveMatchState.events.filter(e=>e.side==="home").length;liveMatchState.ga=liveMatchState.events.filter(e=>e.side==="away").length;$("#liveClock").textContent="90:00";$("#liveScore").textContent=`${liveMatchState.gh} - ${liveMatchState.ga}`;liveMatchState.done=true;$("#liveFeed").insertAdjacentHTML("afterbegin","<p><b>90' · Simulação concluída. Apito final!</b></p>");$("#app").insertAdjacentHTML("beforeend",`<section class="card"><h2>Fim de jogo</h2><div class="big green">${liveMatchState.gh} x ${liveMatchState.ga}</div><button class="primary" onclick="screen('home')">CONTINUAR</button></section>`);}
+
+function finishSeason(){
+ let order=standings(),pos=order.indexOf(G.club)+1,met=G.division==="B"?pos<=4:pos<=G.obj;
+ G.board=Math.max(0,Math.min(100,(G.board||60)+(met?15:-20)));
+ const currentClub=G.clubs[G.club];
+ if(G.division==="A"){
+   let downSlots=order.slice(-4),down=downSlots.map(i=>G.clubs[i].name);
+   let bOrder=bNames.map((_,i)=>i).sort((a,b)=>{let x=G.bTable[a],y=G.bTable[b];return y.pts-x.pts||y.v-x.v||(y.gp-y.gc)-(x.gp-x.gc)});
+   let bPromoted=[bOrder[0],bOrder[1],playoffWinner(bOrder[2],bOrder[5]),playoffWinner(bOrder[3],bOrder[4])];let up=bPromoted.map(i=>bNames[i]);
+   const userDown=pos>=13;
+   G.lastSeason={champion:G.clubs[order[0]].name,relegated:down,promoted:up,userRelegated:userDown};
+   if(userDown){
+     G.aReserve=G.clubs.slice();G.aReserveSlots=downSlots.slice();
+     let nextB=bNames.slice(0,19).map((n,i)=>createLeagueClub(n,65-i));nextB.push(currentClub);
+     G.clubs=nextB;G.club=19;G.division="B";G.clubs.forEach((c,i)=>autoXI(i));
+   }else{
+     downSlots.forEach((slot,k)=>{G.clubs[slot]=createLeagueClub(up[k],69-k);autoXI(slot)});
+     G.division="A";
+   }
+   G.news.push(`Fim da Série A: ${down.join(", ")} caíram. ${up.join(", ")} subiram da Série B.`);
+   alert(`Campeão: ${G.lastSeason.champion}\n\nREBAIXADOS: ${down.join(", ")}\nPROMOVIDOS: ${up.join(", ")}\n\n${userDown?"Seu clube caiu para a Série B. Agora é buscar o acesso!":"Seu clube permanece na Série A."}`);
+ }else{
+   const promotedSlots=[order[0],order[1],playoffWinner(order[2],order[5]),playoffWinner(order[3],order[4])];
+   const promoted=promotedSlots.map(i=>G.clubs[i]);
+   const userPromoted=promotedSlots.includes(G.club);
+   G.lastSeason={champion:G.clubs[order[0]].name,relegated:[],promoted:promoted.map(c=>c.name),userRelegated:false,userPromoted};
+   if(userPromoted&&G.aReserve&&G.aReserveSlots){
+     let restored=G.aReserve.slice();G.aReserveSlots.forEach((slot,k)=>{restored[slot]=promoted[k]});G.clubs=restored;G.club=G.clubs.indexOf(currentClub);G.division="A";G.aReserve=null;G.aReserveSlots=null;G.clubs.forEach((c,i)=>autoXI(i));
+   }
+   alert(`Série B encerrada!\nCampeão: ${G.lastSeason.champion}\nAcesso: ${promoted.map(c=>c.name).join(", ")}\n\n${userPromoted?"PARABÉNS! Seu clube conquistou o acesso à Série A!":"Seu clube continua na Série B. Tente novamente na próxima temporada."}`);
+   G.news.push(userPromoted?"Acesso conquistado! Seu clube voltou à Série A.":"Seu clube segue na Série B e vai tentar o acesso novamente.");
+ }
+ if(G.news.length>40)G.news.shift();
+ G.season++;G.day=0;G.round=0;G.table=names.map(()=>({pts:0,j:0,v:0,e:0,d:0,gp:0,gc:0}));G.bTable=bNames.map(()=>({pts:0,j:0,v:0,e:0,d:0,gp:0,gc:0}));G.scorers={};G.fixtures=fixtures(20);G.history=[];
+ G.clubs.forEach(c=>c.players.forEach(p=>{p.age++;if(p.age<=24)p.ovr=Math.min(p.pot,p.ovr+Math.random()*4|0);else if(p.age>=31)p.ovr=Math.max(40,p.ovr-(Math.random()*4|0));p.pot=p.age<28?Math.max(p.ovr,p.pot):p.ovr;}));
+ G.news.push(G.division==="B"?"Nova temporada na Série B: lute pelo acesso!":"Nova temporada na Série A: hora de brigar pelo título!");save();screen("home");
+}
+function setFormation(f){let c=G.clubs[G.club];c.formation=f;autoXI(G.club);save();screen("tactics")}
+function cStyle(s){G.clubs[G.club].style=s;save();screen("tactics")}
+function pickSlot(slot){let c=G.clubs[G.club],opts=c.players.map((p,i)=>({p,i})).filter(x=>!x.p.inj&&!x.p.susp).sort((a,b)=>b.p.ovr-a.p.ovr);let html=`<section class="card"><h2>Escolher jogador para ${formations[c.formation][slot]}</h2>`+opts.map(x=>`<button onclick="assign(${slot},${x.i})">${x.p.pos} · ${esc(x.p.name)} · ${x.p.ovr} OVR</button>`).join("")+`<button onclick="screen('tactics')">CANCELAR</button></section>`;$("#app").innerHTML=html;}
+function assign(slot,id){let c=G.clubs[G.club],old=c.xi.indexOf(id);if(old>=0)c.xi[old]=c.xi[slot];c.xi[slot]=id;save();screen("tactics")}
+function playerInfo(i){let p=G.clubs[G.club].players[i];alert(`${p.name} · ${p.pos} · ${p.age} anos\nOverall ${p.ovr} · Potencial ${p.pot}\nGols: ${p.goals}\nMoral: ${p.moral} · Físico: ${p.fit}%\nLesão: ${p.inj?`${p.injuryType||"em recuperação"} · ${p.inj} dias`:"sem lesão"}`);}
+function toast(s){let e=$("#toast");e.textContent=s;e.style.display="block";setTimeout(()=>e.style.display="none",1700)}
+menu();
+</script><script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+}
+</script></body></html>
