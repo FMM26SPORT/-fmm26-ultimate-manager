@@ -493,75 +493,81 @@ function quickSubFMM(id){
 </script>
 
 <script>
-const screenBeforeFixFMM = screen;
+const screenFixFinalFMM = screen;
 
 screen = function(t) {
-  screenBeforeFixFMM(t);
+  try {
+    screenFixFinalFMM(t);
+  } catch (e) {
+    console.error("Erro na tela de táticas:", e);
+  }
 
-  if (t !== "tactics" || !G) return;
+  if (t !== "tactics" || !G || !G.clubs || !G.clubs[G.club]) return;
 
   const c = G.clubs[G.club];
   const field = document.querySelector(".fmm-pitch");
-
   if (!field) return;
 
+  if (!Array.isArray(c.xi) || c.xi.length !== 11 ||
+      c.xi.some(id => !Number.isInteger(id) || !c.players[id])) {
+    autoXI(G.club);
+    save();
+  }
+
+  const coords = [
+    [50,88],[17,70],[38,73],[62,73],[83,70],
+    [28,49],[50,53],[72,49],
+    [17,25],[50,17],[83,25]
+  ];
+
   field.style.cssText = `
-    display:flex;
-    flex-direction:column;
-    justify-content:space-around;
-    gap:12px;
     position:relative;
-    height:auto;
+    display:block;
+    width:100%;
+    height:430px;
     min-height:430px;
-    padding:18px 5px;
+    max-width:520px;
+    margin:auto;
+    padding:0;
+    overflow:hidden;
     box-sizing:border-box;
+    border:2px solid #d8f5df;
+    border-radius:14px;
     background:repeating-linear-gradient(
       0deg,#176b3c 0px,#176b3c 52px,
-      #207c46 52px,#207c46 104px);
-    border:3px solid white;
-    border-radius:12px;
+      #207c46 52px,#207c46 104px
+    );
   `;
 
-  const rows = [3,2,1,0];
-
-  field.innerHTML = rows.map(g => {
-    const players = c.xi.map((id,i) => ({
-      p:c.players[id], slot:i
-    })).filter(x => group(x.p.pos) === g);
-
-    return `<div style="
-      display:flex;
-      justify-content:space-around;
-      align-items:center;
-      gap:3px;
-      position:relative;
-      z-index:2;
-      flex-wrap:nowrap;">
-      ${players.map(x => `
-        <button onclick="pickSlot(${x.slot})"
-          style="position:relative;
-          transform:none;
-          width:31%;
-          min-width:0;
-          padding:8px 2px;
-          background:#10243a;
-          color:white;
-          border:2px solid #62e5a0;
-          border-radius:9px;
-          display:flex;
-          flex-direction:column;
-          align-items:center;
-          gap:3px;">
-          <b style="font-size:18px;color:#55e69b">
-            ${x.p.ovr}
-          </b>
-          <span>${x.p.pos}</span>
-          <small style="font-size:10px;overflow-wrap:anywhere">
-            ${esc(x.p.name)}
-          </small>
-        </button>
-      `).join("")}
-    </div>`;
+  field.innerHTML = coords.map((xy,i) => {
+    const p = c.players[c.xi[i]];
+    return `<button class="fmm-player"
+      onclick="pickSlot(${i})"
+      style="
+        position:absolute;
+        left:${xy[0]}%;
+        top:${xy[1]}%;
+        transform:translate(-50%,-50%);
+        width:76px;
+        max-width:24%;
+        min-height:62px;
+        padding:4px 2px;
+        background:#10243a;
+        border:2px solid #62e5a0;
+        border-radius:9px;
+        color:white;
+        z-index:2;
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        justify-content:center;
+        gap:2px;
+        font-size:10px;
+      ">
+      <b style="font-size:17px;color:#55e69b">${p.ovr}</b>
+      <span>${esc(p.pos)}</span>
+      <small style="font-size:9px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.name)}</small>
+    </button>`;
   }).join("");
 };
 </script></body></html>
