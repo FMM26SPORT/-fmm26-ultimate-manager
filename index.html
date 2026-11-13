@@ -611,4 +611,151 @@ window.setInterval = function(callback, delay, ...args) {
     });
   }, delay, ...args);
 };
+</script> <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script>
+(function(){
+  const originalShowMatch = window.showMatch;
+  if(typeof originalShowMatch !== "function") return;
+
+  window.showMatch = function(h,a,r){
+    originalShowMatch(h,a,r);
+
+    const old = document.getElementById("match3D");
+    if(old) old.remove();
+
+    const pitch = document.getElementById("livePitch");
+    if(!pitch) return;
+
+    pitch.style.display = "none";
+
+    const wrap = pitch.parentElement;
+    const box = document.createElement("div");
+    box.id = "match3D";
+    box.style.cssText =
+      "width:100%;height:330px;position:relative;overflow:hidden;border-radius:12px;background:#172b20;";
+    wrap.appendChild(box);
+
+    if(!window.THREE){
+      box.innerHTML = "Não foi possível carregar o 3D. Verifique a internet.";
+      return;
+    }
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x172b20);
+
+    const camera = new THREE.PerspectiveCamera(48,box.clientWidth/330,0.1,100);
+    camera.position.set(0,10,17);
+    camera.lookAt(0,0,0);
+
+    const renderer = new THREE.WebGLRenderer({antialias:true});
+    renderer.setSize(box.clientWidth,330);
+    box.appendChild(renderer.domElement);
+
+    scene.add(new THREE.HemisphereLight(0xffffff,0x355533,2));
+    const light = new THREE.DirectionalLight(0xffffff,2);
+    light.position.set(-5,10,8);
+    scene.add(light);
+
+    const grass = new THREE.Mesh(
+      new THREE.PlaneGeometry(18,11),
+      new THREE.MeshStandardMaterial({color:0x25843c})
+    );
+    grass.rotation.x = -Math.PI/2;
+    scene.add(grass);
+
+    function line(x,z,w,d){
+      const m = new THREE.Mesh(
+        new THREE.BoxGeometry(w,0.025,d),
+        new THREE.MeshBasicMaterial({color:0xffffff})
+      );
+      m.position.set(x,0.025,z);
+      scene.add(m);
+    }
+
+    line(0,0,0.035,11);
+    line(0,-5.5,18,0.04);
+    line(0,5.5,18,0.04);
+    line(-9,0,0.04,11);
+    line(9,0,0.04,11);
+
+    const circle = new THREE.Mesh(
+      new THREE.TorusGeometry(1.5,0.025,8,64),
+      new THREE.MeshBasicMaterial({color:0xffffff})
+    );
+    circle.rotation.x=Math.PI/2;
+    circle.position.y=0.04;
+    scene.add(circle);
+
+    function player(x,z,color){
+      const group=new THREE.Group();
+      const shirt=new THREE.Mesh(
+        new THREE.CylinderGeometry(0.23,0.28,0.65,12),
+        new THREE.MeshStandardMaterial({color})
+      );
+      shirt.position.y=0.85;
+      group.add(shirt);
+
+      const head=new THREE.Mesh(
+        new THREE.SphereGeometry(0.17,12,12),
+        new THREE.MeshStandardMaterial({color:0xe5b58c})
+      );
+      head.position.y=1.32;
+      group.add(head);
+
+      const shorts=new THREE.Mesh(
+        new THREE.BoxGeometry(0.4,0.2,0.3),
+        new THREE.MeshStandardMaterial({color:0x18202a})
+      );
+      shorts.position.y=0.42;
+      group.add(shorts);
+
+      for(let s of [-1,1]){
+        const leg=new THREE.Mesh(
+          new THREE.BoxGeometry(0.12,0.42,0.14),
+          new THREE.MeshStandardMaterial({color:0xeeeeee})
+        );
+        leg.position.set(s*0.11,0.2,0);
+        group.add(leg);
+      }
+
+      group.position.set(x,0,z);
+      scene.add(group);
+      return group;
+    }
+
+    const players=[];
+    for(let i=0;i<11;i++){
+      const x=-7+(i%4)*1.8;
+      const z=-4+(i%3)*3.5;
+      players.push(player(x,z,0x1769d2));
+    }
+    for(let i=0;i<11;i++){
+      const x=7-(i%4)*1.8;
+      const z=-4+(i%3)*3.5;
+      players.push(player(x,z,0xe52b35));
+    }
+
+    const ball=new THREE.Mesh(
+      new THREE.SphereGeometry(0.16,16,16),
+      new THREE.MeshStandardMaterial({color:0xffffff})
+    );
+    ball.position.set(0,0.18,0);
+    scene.add(ball);
+
+    let t=0;
+    function animate(){
+      if(!box.isConnected) return;
+      requestAnimationFrame(animate);
+      t+=0.018;
+      players.forEach((p,i)=>{
+        p.position.x += Math.sin(t+i)*0.008;
+        p.position.z += Math.cos(t+i)*0.008;
+      });
+      ball.position.x=Math.sin(t)*3;
+      ball.position.z=Math.cos(t*1.4)*2;
+      renderer.render(scene,camera);
+    }
+    animate();
+  };
+})();
 </script></body></html>
