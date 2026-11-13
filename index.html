@@ -570,4 +570,45 @@ screen = function(t) {
     </button>`;
   }).join("");
 };
+</script><script>
+/* FMM 26 - Movimento dos 22 jogadores */
+const fmmOriginalInterval = window.setInterval.bind(window);
+
+window.setInterval = function(callback, delay, ...args) {
+  if (delay !== 420 || typeof callback !== "function") {
+    return fmmOriginalInterval(callback, delay, ...args);
+  }
+
+  return fmmOriginalInterval(function() {
+    callback();
+
+    if (!liveMatchState || liveMatchState.paused || liveMatchState.done) return;
+
+    const ball = document.querySelector("#liveBall");
+    const bx = Number(ball?.getAttribute("cx") || 50);
+    const by = Number(ball?.getAttribute("cy") || 50);
+
+    document.querySelectorAll("#livePitch .player-dot").forEach(node => {
+      const circle = node.querySelector("circle");
+      const label = node.querySelector("text");
+      if (!circle || !label) return;
+
+      let x = Number(circle.getAttribute("cx"));
+      let y = Number(circle.getAttribute("cy"));
+
+      x += (bx - x) * 0.07 + (Math.random() - 0.5) * 1.5;
+      y += (by - y) * 0.07 + (Math.random() - 0.5) * 1.5;
+
+      x = Math.max(4, Math.min(96, x));
+      y = Math.max(4, Math.min(96, y));
+
+      circle.setAttribute("cx", x);
+      circle.setAttribute("cy", y);
+      circle.style.transition = "cx .42s ease, cy .42s ease";
+
+      label.setAttribute("x", x);
+      label.setAttribute("y", y + 1.15);
+    });
+  }, delay, ...args);
+};
 </script></body></html>
