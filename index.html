@@ -353,4 +353,142 @@ daily=function(){
   }
 };
 </script>
+ 
+<script>
+/* FMM 26 - Nova interface de escalacao */
+const oldTacticsScreenFMM = screen;
+
+screen = function(t) {
+  oldTacticsScreenFMM(t);
+
+  if (t !== "tactics" || !G) return;
+
+  const c = G.clubs[G.club];
+  const slots = formations[c.formation];
+  const coords = [
+    [50,88],[17,70],[38,73],[62,73],[83,70],
+    [28,49],[50,53],[72,49],
+    [17,25],[50,17],[83,25]
+  ];
+
+  const titulares = c.xi.map(i => c.players[i]);
+  const media = arr => arr.length
+    ? Math.round(arr.reduce((s,p)=>s+p.ovr,0)/arr.length)
+    : 0;
+
+  const ataque = media(titulares.filter(p =>
+    ["PE","PD","CA"].includes(p.pos)));
+  const meio = media(titulares.filter(p =>
+    ["VOL","MC","MEI"].includes(p.pos)));
+  const defesa = media(titulares.filter(p =>
+    ["ZAG","LD","LE","GOL"].includes(p.pos)));
+  const entrosamento = Math.round(
+    titulares.reduce((s,p)=>s+p.moral,0)/11
+  );
+
+  const pitch = coords.map((xy,i) => {
+    const p = c.players[c.xi[i]];
+    return `<button class="fmm-player"
+      style="left:${xy[0]}%;top:${xy[1]}%"
+      onclick="pickSlot(${i})">
+      <b>${p.ovr}</b>
+      <span>${p.pos}</span>
+      <small>${esc(p.name)}</small>
+    </button>`;
+  }).join("");
+
+  const bench = c.players.map((p,i)=>({p,i}))
+    .filter(x=>!c.xi.includes(x.i))
+    .sort((a,b)=>b.p.ovr-a.p.ovr);
+
+  $("#app").innerHTML = `
+  <style>
+  .fmm-tactics{display:grid;gap:12px}
+  .fmm-pitch{
+    position:relative;height:430px;max-width:520px;
+    margin:auto;border:2px solid #d8f5df;border-radius:14px;
+    background:repeating-linear-gradient(
+      0deg,#176b3c 0px,#176b3c 52px,
+      #207c46 52px,#207c46 104px);
+    overflow:hidden;
+  }
+  .fmm-pitch:before{
+    content:"";position:absolute;left:0;right:0;top:50%;
+    border-top:2px solid #ffffff99;
+  }
+  .fmm-pitch:after{
+    content:"";position:absolute;width:110px;height:110px;
+    border:2px solid #ffffff99;border-radius:50%;
+    left:50%;top:50%;transform:translate(-50%,-50%);
+  }
+  .fmm-player{
+    position:absolute;transform:translate(-50%,-50%);
+    width:76px;min-height:62px;padding:5px 2px;
+    background:#10243a;border:1px solid #62e5a0;
+    border-radius:10px;color:white;z-index:1;
+    display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:1px;font-size:10px;
+  }
+  .fmm-player b{font-size:17px;color:#55e69b}
+  .fmm-player small{font-size:9px;max-width:72px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .fmm-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+  .fmm-stat{background:#0d1928;padding:12px;border-radius:10px;text-align:center}
+  .fmm-stat b{font-size:23px;color:#43dc91}
+  .fmm-bench{display:grid;gap:7px}
+  .fmm-bench button{text-align:left;font-size:12px}
+  .fmm-bench button span{color:#43dc91}
+  </style>
+
+  <section class="card fmm-tactics">
+    <h2>🏟️ Minha escalação</h2>
+    <p>${esc(c.name)} · Formação ${c.formation}</p>
+
+    <label>Formação tática</label>
+    <select onchange="setFormation(this.value)">
+      ${Object.keys(formations).map(f=>
+        `<option ${c.formation===f?"selected":""}>${f}</option>`
+      ).join("")}
+    </select>
+
+    <div class="fmm-pitch">${pitch}</div>
+    <p class="small">Toque em um jogador no campo para trocar.</p>
+
+    <div class="fmm-stats">
+      <div class="fmm-stat"><b>${ataque}</b><br>⚽ Ataque</div>
+      <div class="fmm-stat"><b>${meio}</b><br>🎯 Meio-campo</div>
+      <div class="fmm-stat"><b>${defesa}</b><br>🛡️ Defesa</div>
+      <div class="fmm-stat"><b>${entrosamento}</b><br>🤝 Entrosamento</div>
+    </div>
+
+    <button class="primary" onclick="autoXI(G.club);save();screen('tactics')">
+      ✨ ESCALAÇÃO AUTOMÁTICA
+    </button>
+
+    <h3>🪑 BANCO DE RESERVAS</h3>
+    <div class="fmm-bench">
+      ${bench.map(x=>`
+        <button onclick="quickSubFMM(${x.i})">
+          ${esc(x.p.name)} · ${x.p.pos}
+          <span> · ${x.p.ovr} OVR</span>
+          <br><small>${x.p.age} anos · Físico ${x.p.fit}%</small>
+        </button>
+      `).join("")}
+    </div>
+  </section>`;
+};
+
+function quickSubFMM(id){
+  const c=G.clubs[G.club];
+  const p=c.players[id];
+  if(p.inj || p.susp){
+    alert("Jogador indisponível!");
+    return;
+  }
+  const slot=prompt("Qual titular deseja substituir? Digite a posição de 1 a 11.");
+  const n=Number(slot)-1;
+  if(!Number.isInteger(n)||n<0||n>10)return;
+  assign(n,id);
+}
+</script>
 </body></html>
