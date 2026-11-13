@@ -234,4 +234,123 @@ menu();
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
 }
-</script></body></html>
+</script>
+<script>
+/* FMM 26 - Atualizacao de gestao */
+function ensureManagement(){
+  if(!G) return;
+  if(!G.finance) G.finance={balance:8000000,sponsor:0};
+  if(!G.market) G.market=[
+    {name:"Lucas Ferreira",pos:"CA",age:21,ovr:72,pot:84,cost:2500000},
+    {name:"Pedro Santos",pos:"MC",age:19,ovr:68,pot:82,cost:1800000},
+    {name:"Rafael Costa",pos:"ZAG",age:23,ovr:74,pot:80,cost:3000000},
+    {name:"Bruno Lima",pos:"PE",age:20,ovr:70,pot:86,cost:2200000}
+  ];
+  if(!G.academy) G.academy=[];
+}
+function buyPlayer(i){
+  ensureManagement();
+  let p=G.market[i];
+  if(!p || G.finance.balance<p.cost){
+    alert("Dinheiro insuficiente!");
+    return;
+  }
+  G.finance.balance-=p.cost;
+  G.clubs[G.club].players.push({
+    name:p.name,pos:p.pos,age:p.age,ovr:p.ovr,
+    pot:p.pot,moral:70,fit:100,inj:0,susp:0,
+    goals:0,base:false
+  });
+  G.market.splice(i,1);
+  save();screen("more");
+  toast("Contratacao realizada!");
+}
+function scoutYouth(){
+  ensureManagement();
+  if(G.finance.balance<200000){
+    alert("Dinheiro insuficiente!");
+    return;
+  }
+  G.finance.balance-=200000;
+  let posicoes=["CA","MC","ZAG","PE","PD","GOL"];
+  let nomes=["Matheus","Gabriel","Enzo","Davi","Miguel","Arthur"];
+  G.academy.push({
+    name:nomes[Math.random()*nomes.length|0]+" da Base",
+    pos:posicoes[Math.random()*posicoes.length|0],
+    age:16,ovr:55+(Math.random()*12|0),
+    pot:75+(Math.random()*16|0)
+  });
+  save();screen("more");
+  toast("Novo jovem encontrado!");
+}
+function promoteYouth(i){
+  ensureManagement();
+  let p=G.academy[i];
+  if(!p)return;
+  G.clubs[G.club].players.push({
+    ...p,moral:70,fit:100,inj:0,susp:0,
+    goals:0,base:true
+  });
+  G.academy.splice(i,1);
+  save();screen("more");
+}
+function hireSponsor(){
+  ensureManagement();
+  if(G.finance.sponsor){
+    alert("Voce ja tem um patrocinador!");
+    return;
+  }
+  G.finance.sponsor=500000;
+  save();screen("more");
+  toast("Patrocinador contratado!");
+}
+const oldScreenFMM=screen;
+screen=function(t){
+  ensureManagement();
+  oldScreenFMM(t);
+  if(t==="more" && G){
+    let f=G.finance;
+    let market=G.market;
+    let youth=G.academy;
+    let html=`
+    <section class="card">
+      <h2>💰 Financas do clube</h2>
+      <h3>Saldo: R$ ${f.balance.toLocaleString("pt-BR")}</h3>
+      <p>Patrocinio semanal: R$ ${f.sponsor.toLocaleString("pt-BR")}</p>
+      <button onclick="hireSponsor()">CONTRATAR PATROCINADOR</button>
+      <p class="small">Despesas semanais estimadas: R$ 350.000</p>
+    </section>
+    <section class="card">
+      <h2>🔄 Mercado de transferencias</h2>
+      ${market.length?market.map((p,i)=>`
+        <p><b>${p.name}</b> · ${p.pos} · ${p.age} anos
+        <br>Overall ${p.ovr} · Potencial ${p.pot}
+        <br>Preco: R$ ${p.cost.toLocaleString("pt-BR")}</p>
+        <button onclick="buyPlayer(${i})">CONTRATAR</button>
+      `).join(""):"<p>Sem jogadores disponiveis.</p>"}
+    </section>
+    <section class="card">
+      <h2>🌟 Categorias de base</h2>
+      <button onclick="scoutYouth()">BUSCAR JOVEM (R$ 200.000)</button>
+      ${youth.map((p,i)=>`
+        <p>${p.name} · ${p.pos} · ${p.age} anos
+        <br>Overall ${p.ovr} · Potencial ${p.pot}
+        <br><button onclick="promoteYouth(${i})">PROMOVER AO ELENCO</button></p>
+      `).join("")}
+      ${youth.length?"":"<p>Nenhum jovem encontrado ainda.</p>"}
+    </section>`;
+    $("#app").insertAdjacentHTML("beforeend",html);
+  }
+};
+const oldDailyFMM=daily;
+daily=function(){
+  oldDailyFMM();
+  ensureManagement();
+  if(G.day%7===0){
+    G.finance.balance+=G.finance.sponsor-350000;
+    G.news.push("Financas semanais atualizadas.");
+    save();
+  }
+};
+</script>
+</body></html>
