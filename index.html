@@ -758,4 +758,102 @@ window.setInterval = function(callback, delay, ...args) {
     animate();
   };
 })();
-</script></body></html>
+
+</script>
+<script>
+/* NOVO PAINEL FMM 26 */
+(function(){
+  const oldScreenDashboard = screen;
+
+  const style = document.createElement("style");
+  style.textContent = `
+    .dash-hero{
+      background:linear-gradient(135deg,#173d35,#10251f 65%,#172b3d);
+      border:1px solid #28634b;border-radius:18px;
+      padding:19px;margin:12px 0;
+    }
+    .dash-kicker{color:#62e6a0;font-size:11px;font-weight:900;letter-spacing:2px}
+    .dash-club{font-size:25px;font-weight:950;margin:8px 0}
+    .dash-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin:12px 0}
+    .dash-box{background:#172538;border:1px solid #293e55;border-radius:14px;padding:13px}
+    .dash-box b{font-size:23px;color:#62e6a0}
+    .dash-box small{display:block;color:#9aacc0;margin-top:4px}
+    .dash-title{font-size:12px;color:#62e6a0;font-weight:900;letter-spacing:1px;margin-bottom:9px}
+    .dash-match{background:linear-gradient(120deg,#1c3044,#172538);border:1px solid #344b63;border-radius:15px;padding:15px;text-align:center}
+    .dash-opponent{font-size:21px;font-weight:900;margin:10px 0}
+    .dash-news{padding:10px 0;border-bottom:1px solid #29394c;font-size:13px}
+    .dash-rank{display:flex;justify-content:space-between;padding:8px;border-bottom:1px solid #29394c;font-size:13px}
+    .dash-rank.mine{color:#62e6a0;font-weight:900}
+    .dash-label{color:#9aacc0;font-size:11px}
+  `;
+  document.head.appendChild(style);
+
+  function dashboard(){
+    if(!G || !G.started) return;
+    const c=G.clubs[G.club];
+    const nm=nextMatch();
+    const tb=G.table[G.club];
+    const order=standings();
+    const pos=order.indexOf(G.club)+1;
+    const opponent=nm
+      ? G.clubs[nm.home===G.club?nm.away:nm.home].name
+      : "Temporada encerrada";
+
+    document.querySelector("#app").innerHTML=`
+      <section class="dash-hero">
+        <div class="dash-kicker">CENTRAL DO CLUBE · TEMPORADA ${G.season}</div>
+        <div class="dash-club">${esc(c.name)}</div>
+        <div class="dash-label">Treinador: ${esc(G.coach)}</div>
+        <p>${G.division==="A"?"Brasileirão Série A":"Brasileirão Série B"} · Rodada ${G.round}/38</p>
+        <button class="primary" onclick="advance()">AVANÇAR DIA →</button>
+      </section>
+
+      <div class="dash-title">VISÃO GERAL</div>
+      <div class="dash-grid">
+        <div class="dash-box"><b>${pos}º</b><small>Posição na tabela</small></div>
+        <div class="dash-box"><b>${tb.pts}</b><small>Pontos conquistados</small></div>
+        <div class="dash-box"><b>${avgXI(G.club)}</b><small>Força do elenco titular</small></div>
+        <div class="dash-box"><b>${G.board||60}%</b><small>Confiança da diretoria</small></div>
+      </div>
+
+      <section class="dash-match">
+        <div class="dash-title">PRÓXIMO COMPROMISSO</div>
+        <div class="dash-label">${nm?(nm.home===G.club?"🏟️ EM CASA":"✈️ FORA"):"FIM DA TEMPORADA"}</div>
+        <div class="dash-opponent">${esc(opponent)}</div>
+        <p>${nm?`Daqui a ${nm.days} dia(s)`:"Confira o resumo da temporada."}</p>
+        <button class="primary" onclick="advance()">CONTINUAR CARREIRA</button>
+      </section>
+
+      <section class="card">
+        <div class="dash-title">CLASSIFICAÇÃO · TOP 5</div>
+        ${order.slice(0,5).map((id,i)=>`
+          <div class="dash-rank ${id===G.club?"mine":""}">
+            <span>${i+1}. ${esc(G.clubs[id].name)}</span>
+            <b>${G.table[id].pts} pts</b>
+          </div>`).join("")}
+        <button onclick="screen('table')">VER CLASSIFICAÇÃO COMPLETA →</button>
+      </section>
+
+      <section class="card">
+        <div class="dash-title">CENTRAL DE NOTÍCIAS</div>
+        ${(G.news||[]).slice(-4).reverse().map(n=>`
+          <div class="dash-news">📰 ${esc(n)}</div>
+        `).join("")}
+      </section>
+
+      <section class="card">
+        <div class="dash-title">ÚLTIMO RESULTADO</div>
+        <b>${esc(G.last||"Nenhuma partida disputada.")}</b>
+      </section>
+    `;
+  }
+
+  screen=function(t){
+    oldScreenDashboard(t);
+    if(t==="home") dashboard();
+  };
+})();
+</script>
+</body>
+</html>
+
