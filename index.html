@@ -109,8 +109,86 @@ if(t==="squad"){out=`<section class="card"><h2>Elenco · ${c.players.length} jog
 if(t==="tactics"){out=`<section class="card"><h2>Táticas</h2><label>Formação</label><select id="formation" onchange="setFormation(this.value)">${Object.keys(formations).map(f=>`<option ${c.formation===f?"selected":""}>${f}</option>`).join("")}</select><label>Estilo</label><select id="style" onchange="cStyle(this.value)">${["Defensivo","Equilibrado","Ofensivo"].map(s=>`<option ${c.style===s?"selected":""}>${s}</option>`).join("")}</select><button onclick="autoXI(${G.club});save();screen('tactics')">AUTO-ESCALAR</button><h3>TITULARES · toque para trocar</h3>${formations[c.formation].map((s,i)=>`<button onclick="pickSlot(${i})">${s} · ${esc(c.players[c.xi[i]].name)} (${c.players[c.xi[i]].ovr})</button>`).join("")}</section>`;}
 if(t==="table"){let order=standings();out=`<section class="card"><h2>Classificação</h2><div style="overflow-x:auto"><table><tr><th>#</th><th>Time</th><th>Pts</th><th>J</th><th>V</th><th>E</th><th>D</th><th>SG</th></tr>${order.map((i,n)=>{let x=G.table[i];return `<tr class="${i===G.club?"mine":""}"><td>${n+1}</td><td>${esc(G.clubs[i].name)}</td><td>${x.pts}</td><td>${x.j}</td><td>${x.v}</td><td>${x.e}</td><td>${x.d}</td><td>${x.gp-x.gc}</td></tr>`}).join("")}</table></div></section>${G.division==="A"?`<section class="card"><h3>SÉRIE B · DISPUTA PELO ACESSO</h3><div style="overflow-x:auto"><table><tr><th>#</th><th>Time</th><th>Pts</th><th>J</th><th>SG</th></tr>${bNames.map((n,i)=>i).sort((a,b)=>G.bTable[b].pts-G.bTable[a].pts||G.bTable[b].v-G.bTable[a].v||(G.bTable[b].gp-G.bTable[b].gc)-(G.bTable[a].gp-G.bTable[a].gc)).map((i,n)=>`<tr><td>${n+1}</td><td>${esc(bNames[i])}</td><td>${G.bTable[i].pts}</td><td>${G.bTable[i].j}</td><td>${G.bTable[i].gp-G.bTable[i].gc}</td></tr>`).join("")}</table></div><p class="small">Os dois primeiros sobem direto. Do 3º ao 6º, os clubes disputam dois playoffs por mais duas vagas.</p></section>`:""}<section class="card"><h3>ARTILHARIA</h3>${Object.entries(G.scorers).sort((a,b)=>b[1]-a[1]).slice(0,12).map(([n,v])=>`<p>${v} gols · ${esc(n)}</p>`).join("")||"<p>Ainda sem gols.</p>"}</section><section class="card"><h3>ÚLTIMOS RESULTADOS</h3>${G.history?.slice(-8).reverse().map(x=>`<p>${G.clubs[x.h].name} ${x.hg} x ${x.ag} ${G.clubs[x.a].name}</p>`).join("")||"<p>Nenhuma partida ainda.</p>"}</section>`;}
 if(t==="more"){let hurt=c.players.map((p,i)=>({p,i})).filter(x=>x.p.inj>0);out=`<section class="card"><h2>Departamento médico</h2><p>${hurt.length?hurt.map(x=>`${esc(x.p.name)} · ${x.p.inj} dia(s) de recuperação`).join("<br>") : "Nenhum jogador lesionado no momento."}</p><p class="small">Lesões podem acontecer em partidas e treinamentos. Jogadores lesionados não entram na escalação.</p></section><section class="card"><h2>Mais opções</h2>${G.lastSeason?`<p>Última temporada: campeão ${esc(G.lastSeason.champion)}.</p><p>Rebaixados: ${G.lastSeason.relegated.map(esc).join(", ")}</p><p>Promovidos: ${G.lastSeason.promoted.map(esc).join(", ")}</p>`:""}<button class="primary" onclick="save();toast('Jogo salvo!')">SALVAR JOGO</button><button onclick="if(confirm('Voltar ao menu? Seu progresso ficará salvo.')){save();G=null;menu()}">MENU PRINCIPAL</button><p class="muted">Versão mobile · elencos-base 2026 · reservas fictícias da base identificadas · progresso salvo neste aparelho.</p></section>`;}
-$("#app").innerHTML=out;}
-function menu(){ $("#nav").hidden=true;$("#seasonTag").textContent="";let has=!!localStorage.getItem("fmm_mobile_save_2026_v3");$("#app").innerHTML=`<section class="card"><h1>FOOTBALL<br>MASTER MANAGER</h1><p>Monte seu time, escolha as táticas e leve seu clube ao título.</p><label>Nome do treinador</label><input id="coach" placeholder="Seu nome" maxlength="24"><button class="primary" onclick="newGame()">NOVO JOGO</button><button onclick="if(load())screen('home');else toast('Nenhum save encontrado')">CONTINUAR</button><p class="small">Jogo de gerenciamento · offline · feito para celular</p></section>`;}
+$("#app").innerHTML=out;}function menu(){
+  $("#nav").hidden=true;
+  $("#seasonTag").textContent="";
+
+  if(!document.getElementById("fmm-start-style")){
+    const s=document.createElement("style");
+    s.id="fmm-start-style";
+    s.textContent=`
+      .start-screen{
+        position:relative;overflow:hidden;
+        min-height:75vh;padding:35px 20px;
+        border-radius:20px;text-align:center;
+        display:flex;flex-direction:column;
+        justify-content:center;align-items:center;
+        background:
+          radial-gradient(ellipse at 50% 100%,#176b43 0%,transparent 48%),
+          linear-gradient(160deg,#101d32,#050910 75%);
+        border:1px solid #263b50;
+      }
+      .start-screen:before{
+        content:"";position:absolute;inset:0;
+        background:repeating-linear-gradient(
+          115deg,transparent 0 65px,
+          #ffffff08 66px 68px,transparent 69px 130px
+        );
+        pointer-events:none;
+      }
+      .start-brand{position:relative;font-size:13px;
+        letter-spacing:5px;color:#a8c4d8;font-weight:900}
+      .start-title{position:relative;font-size:clamp(38px,10vw,58px);
+        line-height:.95;margin:15px 0;color:white;font-weight:1000}
+      .start-title span{color:#38e58b}
+      .start-subtitle{position:relative;color:#aebdca;
+        font-size:13px;margin-bottom:30px}
+      .start-panel{position:relative;width:100%;max-width:360px;
+        padding:20px;background:#101b2bdc;
+        border:1px solid #ffffff20;border-radius:17px}
+      .start-panel label{display:block;text-align:left;
+        color:#aebdca;font-size:12px;margin-bottom:8px}
+      .start-input{width:100%;box-sizing:border-box;
+        padding:14px;border-radius:10px;
+        background:#07111d;color:white;
+        border:1px solid #344b60;font-size:15px;margin-bottom:15px}
+      .start-actions{display:grid;gap:11px}
+      .start-actions button{width:100%;padding:15px;
+        border-radius:10px;font-weight:900;letter-spacing:1px}
+      .start-primary{background:#31dc83;color:#06140c;border:0}
+      .start-secondary{background:#172b40;color:white;
+        border:1px solid #3b5870}
+      .start-footer{position:relative;color:#7890a3;
+        font-size:11px;margin-top:25px;letter-spacing:2px}
+    `;
+    document.head.appendChild(s);
+  }
+
+  $("#app").innerHTML=`
+    <section class="start-screen">
+      <div class="start-brand">ULTIMATE SPORTS PRESENTS</div>
+      <h1 class="start-title">FMM <span>26</span></h1>
+      <p class="start-subtitle">
+        CONSTRUA SUA HISTÓRIA. DOMINE O FUTEBOL.
+      </p>
+      <div class="start-panel">
+        <label>NOME DO TREINADOR</label>
+        <input class="start-input" id="coach"
+          placeholder="Digite seu nome" maxlength="24">
+        <div class="start-actions">
+          <button class="start-primary" onclick="newGame()">
+            ⚽ NOVO JOGO
+          </button>
+          <button class="start-secondary"
+            onclick="if(load())screen('home');else toast('Nenhum save encontrado')">
+            ▶ CONTINUAR CARREIRA
+          </button>
+        </div>
+      </div>
+      <div class="start-footer">FMM 26 · MOBILE EDITION</div>
+    </section>
+  `;
+}
 function nextMatch(){if(G.round>=38)return null;let p=G.fixtures[G.round].find(x=>x.includes(G.club));return p?{home:p[0],away:p[1],days:Math.max(0,7*G.round+5-G.day)}:null}
 function standings(){return G.clubs.map((_,i)=>i).sort((a,b)=>{let x=G.table[a],y=G.table[b];return y.pts-x.pts||y.v-x.v||(y.gp-y.gc)-(x.gp-x.gc)||y.gp-x.gp})}
 function playoffWinner(higherRanked,lowerRanked){return Math.random()<.68?higherRanked:lowerRanked;}
