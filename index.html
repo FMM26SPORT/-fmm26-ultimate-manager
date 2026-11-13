@@ -491,4 +491,77 @@ function quickSubFMM(id){
   assign(n,id);
 }
 </script>
-</body></html>
+
+<script>
+const screenBeforeFixFMM = screen;
+
+screen = function(t) {
+  screenBeforeFixFMM(t);
+
+  if (t !== "tactics" || !G) return;
+
+  const c = G.clubs[G.club];
+  const field = document.querySelector(".fmm-pitch");
+
+  if (!field) return;
+
+  field.style.cssText = `
+    display:flex;
+    flex-direction:column;
+    justify-content:space-around;
+    gap:12px;
+    position:relative;
+    height:auto;
+    min-height:430px;
+    padding:18px 5px;
+    box-sizing:border-box;
+    background:repeating-linear-gradient(
+      0deg,#176b3c 0px,#176b3c 52px,
+      #207c46 52px,#207c46 104px);
+    border:3px solid white;
+    border-radius:12px;
+  `;
+
+  const rows = [3,2,1,0];
+
+  field.innerHTML = rows.map(g => {
+    const players = c.xi.map((id,i) => ({
+      p:c.players[id], slot:i
+    })).filter(x => group(x.p.pos) === g);
+
+    return `<div style="
+      display:flex;
+      justify-content:space-around;
+      align-items:center;
+      gap:3px;
+      position:relative;
+      z-index:2;
+      flex-wrap:nowrap;">
+      ${players.map(x => `
+        <button onclick="pickSlot(${x.slot})"
+          style="position:relative;
+          transform:none;
+          width:31%;
+          min-width:0;
+          padding:8px 2px;
+          background:#10243a;
+          color:white;
+          border:2px solid #62e5a0;
+          border-radius:9px;
+          display:flex;
+          flex-direction:column;
+          align-items:center;
+          gap:3px;">
+          <b style="font-size:18px;color:#55e69b">
+            ${x.p.ovr}
+          </b>
+          <span>${x.p.pos}</span>
+          <small style="font-size:10px;overflow-wrap:anywhere">
+            ${esc(x.p.name)}
+          </small>
+        </button>
+      `).join("")}
+    </div>`;
+  }).join("");
+};
+</script></body></html>
