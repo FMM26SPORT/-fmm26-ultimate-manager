@@ -1,0 +1,8 @@
+[{
+"relation": ["delegate_permission/common.handle_all_urls"],
+"target": {
+"namespace": "android_app",
+"package_name": "io.github.fmm26sport.twa",
+"sha256_cert_fingerprints": ["15:09:97:67:AA:28:87:C4:5F:C0:42:2F:78:76:24:17:35:C3:28:E7:64:91:CF:6D:30:78:46:6B:92:F4:B2:93"]
+}
+}]
