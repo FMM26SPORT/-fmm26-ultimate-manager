@@ -1,4 +1,4 @@
-const CACHE = 'fmm26-shell-v6';
+const CACHE = 'fmm26-shell-v7';
 
 self.addEventListener('install', event => {
   self.skipWaiting();
